@@ -1,3 +1,8 @@
+
+let base = "RUB";
+let convertTo = "USD";
+let amount = 1;
+
 ///////////// filling the select options
 
 const currrencyArray = [ 
@@ -33,8 +38,6 @@ const currrencyArray = [
     "JPY" 
 ]
 
-let base = "RUB";
-let convertTo = "USD";
 
 const selections = document.querySelectorAll(".selection");
 selections.forEach(element => {
@@ -46,24 +49,38 @@ selections.forEach(element => {
     }
 })
 
-//////////////////////////
+////////////////////////// GETRATE func
 
-const url = 'https://api.exchangerate.host/latest';
 
-async function getRates() {
-    const response = await fetch('https://api.exchangerate.host/latest');
+async function getRate(event) {
+    if (event.currentTarget.classList.contains("currency-button-from")) {
+        if (event.currentTarget.tagName === "SELECT") {
+            base = event.currentTarget.value;
+        } else {
+            base = event.currentTarget.innerHTML;
+        }  
+    } 
+    const response = await fetch(`https://api.exchangerate.host/convert?from=${base}&to=${convertTo}&amount=${amount}`);
     const data = await response.json();
-    console.log(data);
+    const output = document.querySelector("input[id='to']");
+    output.value = data.result;
+
+    const baseRateResponse = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${currrencyArray} `);
+    const rateData = await baseRateResponse.json();
+    const rateFrom = document.querySelector("#rate-from");
+    rateFrom.innerHTML = `1 ${base} = ${rateData.rates[`${convertTo}`]} ${convertTo}`
+    /////// fetch with first url version to get rates for base - need to add buttons' currency values to array or smth else
+
 }
 
-getRates();
 
 
-///////////////////// change color on left side buttons
+///////////////////// change color on left side buttons + add listeners
 
 const currencyButtonsFrom = document.querySelectorAll(".currency-button-from");
 currencyButtonsFrom.forEach(element => {
     element.addEventListener("click", changeStyleFrom);
+    element.addEventListener("click", getRate);
 })
 
 function changeStyleFrom(event) {
@@ -82,11 +99,12 @@ function changeStyleFrom(event) {
     }
 }
 
-////////////////////////// change color on right side buttons
+////////////////////////// change color on right side buttons + add listeners
 
 const currencyButtonsTo = document.querySelectorAll(".currency-button-to");
 currencyButtonsTo.forEach(element => {
     element.addEventListener("click", changeStyleTo);
+    element.addEventListener("click", setRate);
 })
 
 function changeStyleTo(event) {
@@ -105,4 +123,22 @@ function changeStyleTo(event) {
     }
 }
 
-//////////////
+////////////// setRATE func
+function setRate(event) {
+    if (event.currentTarget.tagName === "SELECT") {
+        convertTo = event.currentTarget.value;
+    } else {
+        convertTo = event.currentTarget.innerHTML;
+    }
+    getRate(event);
+}
+
+////////////// reacting on input
+
+const input = document.querySelector("input");
+input.addEventListener("keyup", setAmount);
+function setAmount() {
+    amount = input.value;
+    // getRate();
+}
+
