@@ -49,14 +49,17 @@ selections.forEach(element => {
     }
 })
 
-/////////////////////
+//////// finding with selectors
+
+const rateFrom = document.querySelector("#rate-from");
+const rateTo = document.querySelector("#rate-to");
+const output = document.querySelector("input[id='to']");
+const inputFrom = document.querySelector("input");
 const loadingBlock = document.querySelector(".loading-block");
-const timer = setTimeout(() => {
-    loadingBlock.style.display = "flex";
-}, 500)
 
 
-////////////
+
+//////////// REVERSE ARROW 
 
 const reverseArrow = document.querySelector("#convert-arrows");
 reverseArrow.addEventListener("click", swapCurrencies);
@@ -67,24 +70,29 @@ function swapCurrencies() {
     getRate();
 }
 
-///////////
+///////////  INITIAL STATE
 
 async function initialRate() {
+    const timer = setTimeout(() => {
+        loadingBlock.style.display = "flex";
+    }, 50);
     const response = await fetch(`https://api.exchangerate.host/convert?from=${base}&to=${convertTo}&amount=${amount}`);
     const data = await response.json();
+    loadingBlock.style.display = "none";
+    clearTimeout(timer);
     const output = document.querySelector("input[id='to']");
     output.value = data.result;
 }
 initialRate();
-getRate();
+// getRate();
+
+
 ////////////////////////// GETRATE func
 
-const rateFrom = document.querySelector("#rate-from");
-const rateTo = document.querySelector("#rate-to");
-const output = document.querySelector("input[id='to']");
-const inputFrom = document.querySelector("input");
+
 
 async function getRate(event) {
+
     if (event != undefined) {
         if (event.currentTarget.classList.contains("currency-button-from")) {
             if (event.currentTarget.tagName === "SELECT") {
@@ -118,11 +126,11 @@ async function getRate(event) {
     
         rateFrom.innerHTML = `1 ${base} = ${rateData.rates[`${convertTo}`]} ${convertTo}`;
         rateTo.innerHTML = `1 ${convertTo} = ${1/+rateData.rates[`${convertTo}`]} ${base}`;
-    }
-    
 
         clearTimeout(timer);
         loadingBlock.style.display = "none";
+    }
+    
 
 }
 
