@@ -144,3 +144,7 @@ select {
 #convert-arrows {
   margin-top: 100px;
 }
+
+button:hover {
+  cursor: pointer;
+}

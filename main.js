@@ -49,27 +49,52 @@ selections.forEach(element => {
     }
 })
 
-////////////////////////// GETRATE func
+////////////////////
 
-
-async function getRate(event) {
-    if (event.currentTarget.classList.contains("currency-button-from")) {
-        if (event.currentTarget.tagName === "SELECT") {
-            base = event.currentTarget.value;
-        } else {
-            base = event.currentTarget.innerHTML;
-        }  
-    } 
+async function initialRate() {
     const response = await fetch(`https://api.exchangerate.host/convert?from=${base}&to=${convertTo}&amount=${amount}`);
     const data = await response.json();
     const output = document.querySelector("input[id='to']");
     output.value = data.result;
+}
+initialRate();
+getRate();
+////////////////////////// GETRATE func
 
-    const baseRateResponse = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${currrencyArray} `);
+
+async function getRate(event) {
+    if (event != undefined) {
+        if (event.currentTarget.classList.contains("currency-button-from")) {
+            if (event.currentTarget.tagName === "SELECT") {
+                base = event.currentTarget.value;
+            } else {
+                base = event.currentTarget.innerHTML;
+            }  
+        } 
+    }
+
+    // if (base === convertTo) {
+
+    // }
+    
+    const response = await fetch(`https://api.exchangerate.host/convert?from=${base}&to=${convertTo}&amount=${amount}`);
+    const data = await response.json();
+    const output = document.querySelector("input[id='to']");
+
+    // console.log(typeof data.result, data.result);
+    output.value = data.result;
+    //.toLocaleString("ru-RU").replace(',', '.') ;
+
+
+    const baseRateResponse = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${convertTo}`);
     const rateData = await baseRateResponse.json();
     const rateFrom = document.querySelector("#rate-from");
-    rateFrom.innerHTML = `1 ${base} = ${rateData.rates[`${convertTo}`]} ${convertTo}`
-    /////// fetch with first url version to get rates for base - need to add buttons' currency values to array or smth else
+    const rateTo = document.querySelector("#rate-to");
+
+
+    rateFrom.innerHTML = `1 ${base} = ${rateData.rates[`${convertTo}`]} ${convertTo}`;
+    rateTo.innerHTML = `1 ${convertTo} = ${1/+rateData.rates[`${convertTo}`]} ${base}`;
+
 
 }
 
@@ -135,10 +160,10 @@ function setRate(event) {
 
 ////////////// reacting on input
 
-const input = document.querySelector("input");
-input.addEventListener("keyup", setAmount);
+const inputFrom = document.querySelector("input");
+inputFrom.addEventListener("keyup", setAmount);
 function setAmount() {
-    amount = input.value;
-    // getRate();
+    amount = inputFrom.value;
+    getRate(); 
 }
 
