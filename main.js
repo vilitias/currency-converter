@@ -49,7 +49,25 @@ selections.forEach(element => {
     }
 })
 
-////////////////////
+/////////////////////
+const loadingBlock = document.querySelector(".loading-block");
+const timer = setTimeout(() => {
+    loadingBlock.style.display = "flex";
+}, 500)
+
+
+////////////
+
+const reverseArrow = document.querySelector("#convert-arrows");
+reverseArrow.addEventListener("click", swapCurrencies);
+function swapCurrencies() {
+    let intermediary = base;
+    base = convertTo;
+    convertTo = intermediary;
+    getRate();
+}
+
+///////////
 
 async function initialRate() {
     const response = await fetch(`https://api.exchangerate.host/convert?from=${base}&to=${convertTo}&amount=${amount}`);
@@ -61,6 +79,10 @@ initialRate();
 getRate();
 ////////////////////////// GETRATE func
 
+const rateFrom = document.querySelector("#rate-from");
+const rateTo = document.querySelector("#rate-to");
+const output = document.querySelector("input[id='to']");
+const inputFrom = document.querySelector("input");
 
 async function getRate(event) {
     if (event != undefined) {
@@ -72,29 +94,35 @@ async function getRate(event) {
             }  
         } 
     }
-
-    // if (base === convertTo) {
-
-    // }
     
-    const response = await fetch(`https://api.exchangerate.host/convert?from=${base}&to=${convertTo}&amount=${amount}`);
-    const data = await response.json();
-    const output = document.querySelector("input[id='to']");
 
-    // console.log(typeof data.result, data.result);
-    output.value = data.result;
-    //.toLocaleString("ru-RU").replace(',', '.') ;
+    if (base === convertTo) {
+        rateFrom.innerHTML = `1 ${base} = 1 ${base}`;
+        rateTo.innerHTML = `1 ${base} = 1 ${base}`;
+        output.value = inputFrom.value;
 
+    } else {
 
-    const baseRateResponse = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${convertTo}`);
-    const rateData = await baseRateResponse.json();
-    const rateFrom = document.querySelector("#rate-from");
-    const rateTo = document.querySelector("#rate-to");
+        const response = await fetch(`https://api.exchangerate.host/convert?from=${base}&to=${convertTo}&amount=${amount}`);
+        const data = await response.json();
+    
+        // console.log(typeof data.result, data.result);
+        output.value = data.result;
+        //.toLocaleString("ru-RU").replace(',', '.') ;
+    
+    
+        const baseRateResponse = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${convertTo}`);
+        const rateData = await baseRateResponse.json();
+        
+    
+    
+        rateFrom.innerHTML = `1 ${base} = ${rateData.rates[`${convertTo}`]} ${convertTo}`;
+        rateTo.innerHTML = `1 ${convertTo} = ${1/+rateData.rates[`${convertTo}`]} ${base}`;
+    }
+    
 
-
-    rateFrom.innerHTML = `1 ${base} = ${rateData.rates[`${convertTo}`]} ${convertTo}`;
-    rateTo.innerHTML = `1 ${convertTo} = ${1/+rateData.rates[`${convertTo}`]} ${base}`;
-
+        clearTimeout(timer);
+        loadingBlock.style.display = "none";
 
 }
 
@@ -160,7 +188,7 @@ function setRate(event) {
 
 ////////////// reacting on input
 
-const inputFrom = document.querySelector("input");
+
 inputFrom.addEventListener("keyup", setAmount);
 function setAmount() {
     amount = inputFrom.value;

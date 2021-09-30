@@ -8,6 +8,11 @@
     <title>Currency converter</title>
 </head>
 <body>
+    <div class="loading-block">
+        <div id="loading-frame"></div>
+        <div id="loading">Loading...</div>
+    </div>
+    
     <div class="roof">
         <div id="logo">
             <img src="images/logo.svg" alt="logo">
@@ -59,7 +64,7 @@
                     <select class="selection currency-button-to"></select>
                 </div>
                 <div class="input-field">
-                    <input id="to" class="large-numbers" type="text" placeholder="1">
+                    <input id="to" class="large-numbers" type="text" placeholder="1"></input>
                     <p id="rate-to" class="current-rate"></p>
                 </div>
             </div>
