@@ -3,13 +3,20 @@ let base = "RUB";
 let convertTo = "USD";
 let amount = 1;
 
+const selections = document.querySelectorAll(".selection");
+const rateFrom = document.querySelector("#rate-from");
+const rateTo = document.querySelector("#rate-to");
+const output = document.querySelector("input[id='to']");
+const inputFrom = document.querySelector("input");
+const loadingBlock = document.querySelector(".loading-block");
+const reverseArrow = document.querySelector("#convert-arrows");
+
 ///////////// filling the select options
 
 const currrencyArray = [ 
     "CHF",
     "NOK",
     "CAD",
-    "GBP",
     "MXN",
     "CNY",
     "ISK",
@@ -39,7 +46,7 @@ const currrencyArray = [
 ]
 
 
-const selections = document.querySelectorAll(".selection");
+
 selections.forEach(element => {
     for (let i = 0; i < currrencyArray.length; i++) {
         const option = document.createElement("option");
@@ -49,42 +56,82 @@ selections.forEach(element => {
     }
 })
 
-//////// finding with selectors
-
-const rateFrom = document.querySelector("#rate-from");
-const rateTo = document.querySelector("#rate-to");
-const output = document.querySelector("input[id='to']");
-const inputFrom = document.querySelector("input");
-const loadingBlock = document.querySelector(".loading-block");
-
-
 
 //////////// REVERSE ARROW 
 
-const reverseArrow = document.querySelector("#convert-arrows");
+
 reverseArrow.addEventListener("click", swapCurrencies);
+
 function swapCurrencies() {
+    // свопнули  сами значения base и convertTo
     let intermediary = base;
     base = convertTo;
     convertTo = intermediary;
+    
+    currencyButtonsFrom.forEach(element => {
+        // снять выделения с выбора валют
+        element.classList.remove("clicked");
+        // выделить нужную кнопку
+        if (element.innerHTML === base) {
+            element.click(); 
+        }
+        // выделить нужный селект?
+        if (element.tagName === "SELECT") {
+            // console.log(element);
+            // element.classList.add("clicked");
+            const options = element.children;
+            for (let i = 0; i < options.length; i++) {
+                if (options[i].value === base) {
+                    // options[i].click();
+                    options[i].parentElement.value = options[i].value;
+                    options[i].parentElement.click();
+                }
+            }
+        }
+    })
+
+    currencyButtonsTo.forEach(element => {
+        element.classList.remove("clicked");
+        if (element.innerHTML === convertTo) {
+            element.click(); 
+        }
+        if (element.tagName === "SELECT") {
+            // console.log(element);
+            // element.classList.add("clicked");
+            const options = element.children;
+            for (let i = 0; i < options.length; i++) {
+                if (options[i].value === convertTo) {
+                    options[i].parentElement.value = options[i].value;
+                    options[i].parentElement.click();
+                }
+            }
+        }
+    })
+
+    
     getRate();
 }
 
 ///////////  INITIAL STATE
 
 async function initialRate() {
+
     const timer = setTimeout(() => {
         loadingBlock.style.display = "flex";
-    }, 50);
+    }, 500);
     const response = await fetch(`https://api.exchangerate.host/convert?from=${base}&to=${convertTo}&amount=${amount}`);
     const data = await response.json();
-    loadingBlock.style.display = "none";
-    clearTimeout(timer);
+
     const output = document.querySelector("input[id='to']");
     output.value = data.result;
+
+    clearTimeout(timer);
+    loadingBlock.style.display = "none";
+
+    
 }
 initialRate();
-// getRate();
+getRate().catch(err => console.log(err));
 
 
 ////////////////////////// GETRATE func
@@ -93,9 +140,14 @@ initialRate();
 
 async function getRate(event) {
 
+    
     if (event != undefined) {
         if (event.currentTarget.classList.contains("currency-button-from")) {
-            if (event.currentTarget.tagName === "SELECT") {
+            if (event.currentTarget.tagName === "SELECT") {// !
+                // const options = event.currentTarget.children;
+                // for (let i = 0; i < options.length; i++) {
+                //     base = options[i].value;
+                // }
                 base = event.currentTarget.value;
             } else {
                 base = event.currentTarget.innerHTML;
@@ -110,25 +162,30 @@ async function getRate(event) {
         output.value = inputFrom.value;
 
     } else {
+        try {
+            const timer = setTimeout(() => {
+                loadingBlock.style.display = "flex";
+            }, 500);
 
-        const response = await fetch(`https://api.exchangerate.host/convert?from=${base}&to=${convertTo}&amount=${amount}`);
-        const data = await response.json();
+            const response = await fetch(`https://api.exchangerate.host/convert?from=${base}&to=${convertTo}&amount=${amount}`);
+            const data = await response.json();
+
+            output.value = +data.result.toFixed(4);
     
-        // console.log(typeof data.result, data.result);
-        output.value = data.result;
-        //.toLocaleString("ru-RU").replace(',', '.') ;
-    
-    
-        const baseRateResponse = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${convertTo}`);
-        const rateData = await baseRateResponse.json();
+            const baseRateResponse = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${convertTo}`);
+            const rateData = await baseRateResponse.json();
+
+            rateFrom.innerHTML = `1 ${base} = ${rateData.rates[`${convertTo}`].toFixed(4)} ${convertTo}`;
+            const reverseRate = 1/+rateData.rates[convertTo];
+            rateTo.innerHTML = `1 ${convertTo} = ${reverseRate.toFixed(4)} ${base}`;
+
+            clearTimeout(timer);
+            loadingBlock.style.display = "none";
+        } catch (error){
+            throw Error(error);
+        }
         
-    
-    
-        rateFrom.innerHTML = `1 ${base} = ${rateData.rates[`${convertTo}`]} ${convertTo}`;
-        rateTo.innerHTML = `1 ${convertTo} = ${1/+rateData.rates[`${convertTo}`]} ${base}`;
-
-        clearTimeout(timer);
-        loadingBlock.style.display = "none";
+        
     }
     
 
@@ -139,7 +196,8 @@ async function getRate(event) {
 ///////////////////// change color on left side buttons + add listeners
 
 const currencyButtonsFrom = document.querySelectorAll(".currency-button-from");
-currencyButtonsFrom.forEach(element => {
+currencyButtonsFrom.forEach((element, index) => {
+
     element.addEventListener("click", changeStyleFrom);
     element.addEventListener("click", getRate);
 })
@@ -150,13 +208,19 @@ function changeStyleFrom(event) {
     })
     event.currentTarget.classList.toggle("clicked");
     if (event.currentTarget.tagName === "SELECT") {
-        const options = document.querySelectorAll("option");
-        options.forEach((element,index) => {
-            if (index > 0) {
-                element.style.backgroundColor = "white";
-                element.style.color = "#c6c6c6";
-            }
-        })
+
+        const options = event.currentTarget.children;
+        for (let i = 0; i < options.length; i++) {
+            options[i].style.backgroundColor = "white";
+            options[i].style.color = "#c6c6c6";
+        }
+        // const options = document.querySelectorAll("option"); // берет вообще все опшены, нехорошо? надо брать только детей
+        // options.forEach((element,index) => {
+        //     if (index > 0) {
+        //         element.style.backgroundColor = "white";
+        //         element.style.color = "#c6c6c6";
+        //     }
+        // })
     }
 }
 
@@ -174,13 +238,19 @@ function changeStyleTo(event) {
     })
     event.currentTarget.classList.toggle("clicked");
     if (event.currentTarget.tagName === "SELECT") {
-        const options = document.querySelectorAll("option");
-        options.forEach((element,index) => {
-            if (index > 0) {
-                element.style.backgroundColor = "white";
-                element.style.color = "#c6c6c6";
-            }
-        })
+
+        const options = event.currentTarget.children;
+        for (let i = 0; i < options.length; i++) {
+            options[i].style.backgroundColor = "white";
+            options[i].style.color = "#c6c6c6";
+        }
+        // const options = document.querySelectorAll("option"); // берет вообще все опшены, нехорошо? надо брать только детей
+        // options.forEach((element,index) => {
+        //     if (index > 0) {
+        //         element.style.backgroundColor = "white";
+        //         element.style.color = "#c6c6c6";
+        //     }
+        // })
     }
 }
 

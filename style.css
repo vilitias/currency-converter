@@ -121,6 +121,10 @@ select {
   font-size: 12px;
 }
 
+select:hover {
+  cursor: pointer;
+}
+
 .input-field {
   width: 259px;
   height: 102px;
