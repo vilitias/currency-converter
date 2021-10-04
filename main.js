@@ -77,8 +77,6 @@ function swapCurrencies() {
         }
         // выделить нужный селект?
         if (element.tagName === "SELECT") {
-            // console.log(element);
-            // element.classList.add("clicked");
             const options = element.children;
             for (let i = 0; i < options.length; i++) {
                 if (options[i].value === base) {
@@ -114,24 +112,8 @@ function swapCurrencies() {
 
 ///////////  INITIAL STATE
 
-async function initialRate() {
-
-    const timer = setTimeout(() => {
-        loadingBlock.style.display = "flex";
-    }, 500);
-    const response = await fetch(`https://api.exchangerate.host/convert?from=${base}&to=${convertTo}&amount=${amount}`);
-    const data = await response.json();
-
-    const output = document.querySelector("input[id='to']");
-    output.value = data.result;
-
-    clearTimeout(timer);
-    loadingBlock.style.display = "none";
-
-    
-}
-initialRate();
-getRate().catch(err => console.log(err));
+getRate();
+// .catch(err => console.log(err)); // ? always do that?
 
 
 ////////////////////////// GETRATE func
@@ -182,6 +164,7 @@ async function getRate(event) {
             clearTimeout(timer);
             loadingBlock.style.display = "none";
         } catch (error){
+            console.log(error);
             throw Error(error);
         }
         
@@ -198,8 +181,12 @@ async function getRate(event) {
 const currencyButtonsFrom = document.querySelectorAll(".currency-button-from");
 currencyButtonsFrom.forEach((element, index) => {
 
-    element.addEventListener("click", changeStyleFrom);
-    element.addEventListener("click", getRate);
+    element.addEventListener("click", changeStyleFrom); //вешаем на все плашки изменение цвета
+    if (index < 4) {
+        element.addEventListener("click", getRate); // на кнопки - клик
+    } else {
+        element.addEventListener("change", getRate); // на селект - изменение
+    }
 })
 
 function changeStyleFrom(event) {
@@ -227,9 +214,13 @@ function changeStyleFrom(event) {
 ////////////////////////// change color on right side buttons + add listeners
 
 const currencyButtonsTo = document.querySelectorAll(".currency-button-to");
-currencyButtonsTo.forEach(element => {
+currencyButtonsTo.forEach((element, index) => {
     element.addEventListener("click", changeStyleTo);
-    element.addEventListener("click", setRate);
+    if (index < 4) {
+        element.addEventListener("click", setRate);
+    } else {
+        element.addEventListener("change", setRate);
+    }
 })
 
 function changeStyleTo(event) {
@@ -268,6 +259,11 @@ function setRate(event) {
 
 
 inputFrom.addEventListener("keyup", setAmount);
+inputFrom.addEventListener("keyup", (event) => {
+    if (event.code === "Enter") {
+        event.currentTarget.blur();
+    }
+})
 function setAmount() {
     amount = inputFrom.value;
     getRate(); 

@@ -12,13 +12,16 @@ p {
 
 .roof {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
   height: 50px;
   background-color: #f5f5f6;
+  padding-left: 15px;
 }
 #nav {
   width: 641px;
+  margin-left: 64px;
+  margin-right: 109px;
 }
 .main-wrapper {
   width: 641px;
@@ -48,6 +51,11 @@ p {
   width: 58px;
   height: 33px;
   background-color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  font-size: 11px;
 }
 
 h1 {
@@ -81,29 +89,51 @@ h1 {
   border-radius: 3px;
 }
 
+.currency-selection {
+  border-radius: 3px;
+}
+
+.currency-button-from:first-child {
+  border-top-left-radius: inherit;
+  border-bottom-left-radius: inherit;
+}
+
 .currency-button-from {
-  width: 50px;
+  width: 51px;
   height: 28px;
   background-color: white;
   margin: 0;
   padding: 0;
   border: none;
+  border-right: 1px solid #e5e5e5;
   color: #c6c6c6;
   font-size: 12px;
 }
+.currency-button-from.selection {
+  border-right: none;
+}
+
 .currency-button-to {
-  width: 50px;
+  width: 51px;
   height: 28px;
   background-color: white;
   margin: 0;
   padding: 0;
   border: none;
+  border-right: 1px solid #e5e5e5;
   color: #c6c6c6;
   font-size: 12px;
 }
 
+.currency-button-to:first-child {
+  border-top-left-radius: inherit;
+  border-bottom-left-radius: inherit;
+}
+.currency-button-to.selection {
+  border-right: none;
+}
 .clicked {
-  width: 50px;
+  width: 51px;
   height: 28px;
   background-color: #833ae0;
   color: white;
@@ -114,11 +144,18 @@ h1 {
 }
 
 select {
-  width: 50px;
+  width: 52px;
   height: 28px;
   border: none;
   color: #c6c6c6;
   font-size: 12px;
+}
+select.clicked {
+  width: 52px;
+  height: 28px;
+  background-color: #833ae0;
+  border-top-right-radius: inherit;
+  border-bottom-right-radius: inherit;
 }
 
 select:hover {
@@ -171,7 +208,6 @@ button:hover {
 
 #loading-frame {
   position: absolute;
-  /* z-index: 1; */
   height: 100%;
   width: 100%;
   background-color: black;
